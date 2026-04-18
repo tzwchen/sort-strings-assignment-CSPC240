@@ -1,58 +1,73 @@
-; Professional comments were omitted. Students should keep professional comments here.
-; This version of getline does not use any library functions.
+;****************************************************************************************************************************
+; Program name: "Get Line"
+; Purpose: This module gets a line from stdin and stores it in the buffer.
+; Copyright (C) 2026 Tristan Chen
+; Author information
+; Author name: Tristan Chen
+; Author email: tchen2006@csu.fullerton.edu
+; File information
+; File name: getline.asm
+; Language: X86-64 (64-bit)
+; Compile: nasm -f elf64 -o getline.o getline.asm
+;****************************************************************************************************************************
 
-%include "safeguard.inc"
+extern fgets
+extern stdin
+
 global getline
-system_read equ 0     ; 0 is the number of the read function provided by the OS
-STDIN equ 0
-LF equ 10
-NULL equ 0
 
 segment .data
-    ; Empty
+    ; No data
 
 segment .bss
-    one resb 1
-    name resb 100
+    ; No bss
 
 segment .text
 getline:
-    
-    BACKUP          ; Removed the colon here. Semicolons are for comments.
+    ; rdi = buffer, rsi = max_len
+    ; Returns 1 if line read, 0 if EOF
 
-    ; Save the passed in parameters in safe registers
-    mov rbx, rdi    ; rbx is the address of the start of the destination string
-    mov r15, rsi
-    sub r15, 2      ; Added a semicolon before this comment
+    push rbp
+    mov rbp, rsp
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rdi
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
 
-    ; Set up a counter of incoming bytes
-    xor r12, r12
+    ; Call fgets
+    mov rdx, [stdin]
+    call fgets
+    cmp rax, 0
+    je eof
 
-begin_loop:
-    ; Block that inputs a single char
-    mov rax, system_read
-    mov rdi, STDIN
-    lea rsi, [one]  ; Copy address of one to rsi
-    mov rdx, 1      ; Corrected: Use rdx for the count of bytes to read
-    syscall
-    ; End of block
+    mov rax, 1
+    jmp done
 
-    ; Block that copies the inputted byte into the destination array if space is available
-    mov al, [one]
-    cmp al, LF
-    je  readdone
-    
-    inc r12
-    cmp r12, r15
-    jge begin_loop  ; If no space, just keep reading until LF is found
-    
-    mov byte [rbx], al
-    inc rbx
-    jmp begin_loop
+eof:
+    mov rax, 0
 
-readdone:
-    mov byte [rbx], NULL ; Null terminate the string
-    
-    RESTORE
-    ; rax is already set by the caller or can be set to the start of the buffer if needed
+done:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rbp
     ret
