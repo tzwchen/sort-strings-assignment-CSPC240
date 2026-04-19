@@ -37,7 +37,7 @@ sort_strings:
     push r12
     push r13
     push r14
-    push 
+    push r15
     
     mov r12, rdi 
     mov r13, rsi 
